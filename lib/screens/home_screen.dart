@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -9,9 +10,37 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String originalText = "이것과 동일하게 입력하시오";
-  bool isAnswer = false;
+
+  int totalSeconds = 0;
+  bool isTimerRunning = false;
+  late Timer timer;
+
+  bool isSubmitted = false;
+  String answerResult = "";
 
   final textController = TextEditingController();
+
+  void onTick(Timer timer) {
+    setState(() {
+      totalSeconds = totalSeconds + 1;
+    });
+  }
+
+  void onStartTyping() {
+    if (isSubmitted == true) {
+      isSubmitted = false;
+    }
+    if (isTimerRunning == false) {
+      isTimerRunning = true;
+      totalSeconds = 0;
+    } else {
+      return;
+    }
+    timer = Timer.periodic(
+      const Duration(seconds: 1),
+      onTick,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 TextFormField(
                   controller: textController,
+                  onTap: onStartTyping,
                   cursorColor: Colors.white,
                   style: const TextStyle(
                     color: Colors.white,
@@ -69,27 +99,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     border: OutlineInputBorder(),
                   ),
                   onFieldSubmitted: (String text) {
-                    setState(() {
-                      if (originalText == textController.text) {
-                        isAnswer = true;
-                      } else {
-                        isAnswer = false;
-                      }
-                    });
+                    submitAnswer();
                   },
                 ),
                 Center(
                   child: IconButton(
                     iconSize: 50,
-                    onPressed: () {
-                      setState(() {
-                        if (originalText == textController.text) {
-                          isAnswer = true;
-                        } else {
-                          isAnswer = false;
-                        }
-                      });
-                    },
+                    onPressed: submitAnswer,
                     icon: const Icon(
                       Icons.keyboard,
                       color: Colors.white,
@@ -97,13 +113,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 Visibility(
-                    visible: isAnswer,
-                    child: const Text(
-                      '정답입니다!',
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
-                    ))
+                  visible: isSubmitted,
+                  child: Text(
+                    answerResult,
+                    style: const TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                Text(
+                  '$totalSeconds',
+                  style: const TextStyle(color: Colors.white, fontSize: 50),
+                )
               ],
             ),
           ),
@@ -117,5 +138,19 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  void submitAnswer() {
+    setState(() {
+      timer.cancel();
+      isSubmitted = true;
+      isTimerRunning = false;
+      if (originalText == textController.text) {
+        answerResult = "정답입니다!";
+      } else {
+        answerResult = "틀렸습니다.";
+      }
+      textController.text = "";
+    });
   }
 }
