@@ -99,19 +99,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     border: OutlineInputBorder(),
                   ),
                   onFieldSubmitted: (String text) {
-                    setState(() {
-                      submitAnswer();
-                    });
+                    submitAnswer();
                   },
                 ),
                 Center(
                   child: IconButton(
                     iconSize: 50,
-                    onPressed: () {
-                      setState(() {
-                        submitAnswer();
-                      });
-                    },
+                    onPressed: submitAnswer,
                     icon: const Icon(
                       Icons.keyboard,
                       color: Colors.white,
@@ -147,14 +141,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void submitAnswer() {
-    timer.cancel();
-    isSubmitted = true;
-    isTimerRunning = false;
-    if (originalText == textController.text) {
-      answerResult = "정답입니다!";
-    } else {
-      answerResult = "틀렸습니다.";
-    }
-    textController.text = "";
+    setState(() {
+      timer.cancel();
+      isSubmitted = true;
+      isTimerRunning = false;
+      if (originalText == textController.text) {
+        answerResult = "정답입니다!";
+      } else {
+        answerResult = "틀렸습니다.";
+      }
+      textController.text = "";
+    });
   }
 }
